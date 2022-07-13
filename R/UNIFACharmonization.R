@@ -11,63 +11,70 @@ UNIFACharmonize=function(data.mat, batches=NULL, sources=NULL, covariates=NULL,
   batch.id=unique(batches); n.batches=length(batch.id)
   if (verbose) cat(paste0("[UNIFAC] ",n.batches," batches identified\n"))
 
-  if (is.null(sources)){ sources=rep(1,p) }
-  sources.f=as.factor(sources); sources = as.numeric(sources.f)
-  source.id=unique(sources); n.sources=length(source.id)
-  if (verbose) cat(paste0("[UNIFAC] ",n.sources," data source identified\n"))
+  sources=rep(1,p)
+  
+  if (!is.null(covariates)){
+    XZ=model.matrix(~covariates+batches.f)
+    X=XZ[,which(attr(XZ,"assign")<2)]
+    
+    regfit=lm(t(data.mat)~XZ-1)
+    
+    beta=regfit$coefficients[1:ncol(X),]
+    Xbeta=t(X%*%beta)
+    data.mat=t(regfit$residuals)
+    # sigma.features=   tcrossprod(sigma(regfit),rep(1,n))
+    # data.mat=t(data.mat)/sigma.features
+  } else{
+    regfit=lm(t(data.mat)~batches.f)
+    data.mat=t(regfit$residuals)
+    # sigma.features= tcrossprod(sigma(regfit),rep(1,n))
+    # data.mat=t(data.mat)/sigma.features
+    Xbeta=matrix(0,p,n)
+  }
 
-  XZ=model.matrix(~covariates+batches.f)
-  X=XZ[,which(attr(XZ,"assign")<2)]
-
-  regfit=lm(t(data.mat)~XZ-1)
-
-  beta=regfit$coefficients[1:ncol(X),]
-  Xbeta=t(X%*%beta)
-
-  data.mat=(regfit$residuals)
-  sigma.features=apply(data.mat,2,sd)
-  data.mat=t(apply(data.mat,2,scale))
-
+  # mn=matrix(0,p,n)
+  # for (i in 1:n){
+  #   mn[,i]=mean(data.mat[,i])
+  #   data.mat[,i]=data.mat[,i]-mn[,i]
+  # }
+  # 
+  # for (b in 1:n.batches){
+  #   dd=mean(data.mat[,batches==b])
+  #   mn[,batches==b]=mn[,batches==b]+dd
+  #   data.mat[,batches==b]=data.mat[,batches==b]+dd
+  # }
+  
   sub.batch = unlist(lapply(c(1,n.batches), combn, x = batch.id, simplify = FALSE), recursive = FALSE)
-  sub.source = unlist(lapply(c(1,n.sources), combn, x = source.id, simplify = FALSE), recursive = FALSE)
-  sub.source=unique(sub.source)
 
-  nvec=rep(NA, n.batches); mvec=rep(NA, n.sources)
-  sig=sigma.rmt(data.mat)
+  nvec=rep(NA, n.batches); 
   sigma.mat.batch=Matrix(1, p, n)
+
+  sig=sigma.rmt(data.mat)
+  data.mat2=data.mat
   for (b in 1:n.batches){
     order.temp.batch=which(batches==batch.id[b])
     nvec[b]=length(order.temp.batch)
-    for (s in 1:n.sources){
-      order.temp.source=which(sources==source.id[s])
-      mvec[s]=length(order.temp.source)
-      s=sigma.rmt(data.mat[order.temp.source, order.temp.batch])
-      sigma.mat.batch[order.temp.source, order.temp.batch]=sigma.mat.batch[order.temp.source, order.temp.batch]*s
-      data.mat[order.temp.source, order.temp.batch]=data.mat[order.temp.source, order.temp.batch]/s
-    }
+  
+    s=sigma.rmt(data.mat[,order.temp.batch])
+    sigma.mat.batch[, order.temp.batch]=sigma.mat.batch[, order.temp.batch]*s
+    data.mat[, order.temp.batch]=data.mat[, order.temp.batch]/s
   }
 
-  lambda.set=matrix(NA, length(sub.source),length(sub.batch))
+  lambda.set=matrix(NA,1,length(sub.batch))
   for (b in 1:length(sub.batch)){
-    for (s in 1:length(sub.source)){
-      lambda.set[s,b]=sqrt(sum(mvec[sub.source[[s]]]))+sqrt(sum(nvec[sub.batch[[b]]]))
-    }
+    lambda.set[b]=sqrt(p)+sqrt(sum(nvec[sub.batch[[b]]]))
   }
 
   index.set.batch=foreach(b=1:length(sub.batch))%do%{ which(batches%in%sub.batch[[b]]) }
-  index.set.source=foreach(s=1:length(sub.source))%do%{ which(sources%in%sub.source[[s]]) }
 
-  estim=matrix(list(), length(sub.source), length(sub.batch))
+  estim=matrix(list(), 1, length(sub.batch))
   for (b in 1:length(sub.batch)){
-    for (s in 1:length(sub.source)){
-      estim[[s,b]]=Matrix(0, p, n, sparse=T)
-    }
+      estim[[1,b]]=Matrix(0, p, n, sparse=T)
   }
 
   bool=TRUE
   count=1; crit0=0
-  foo=matrix(1:(length(sub.source)*length(sub.batch)),length(sub.source))
-  RI=matrix(0, p,n)
+  foo=matrix(1:length(sub.batch),1)
 
   if (verbose) {
     cat(paste0("[UNIFAC] Start optimizing...\n"))
@@ -78,13 +85,11 @@ UNIFACharmonize=function(data.mat, batches=NULL, sources=NULL, covariates=NULL,
     if (verbose){  setTxtProgressBar(pb, count)  }
     crit0.old = crit0
 
-    nuc.temp=matrix(NA,length(sub.source), length(sub.batch))
+    nuc.temp=matrix(NA,1, length(sub.batch))
     for (b in length(sub.batch):1){
-      for (s in length(sub.source):1){
-        temp=softSVD( (data.mat-Reduce("+", estim[-foo[s,b]]))[index.set.source[[s]],index.set.batch[[b]]],lambda.set[s,b])
-        estim[[s,b]][index.set.source[[s]],index.set.batch[[b]]]=temp$out
-        nuc.temp[s,b]=temp$nuc
-      }
+        temp=softSVD( (data.mat-Reduce("+", estim[-foo[1,b]]))[,index.set.batch[[b]]],lambda.set[1,b])
+        estim[[1,b]][,index.set.batch[[b]]]=temp$out
+        nuc.temp[1,b]=temp$nuc
     }
 
     crit0 = 1/2*frob(data.mat-Reduce("+", estim))+sum(lambda.set*nuc.temp,na.rm=T)
@@ -101,15 +106,34 @@ UNIFACharmonize=function(data.mat, batches=NULL, sources=NULL, covariates=NULL,
   if (verbose & count==max.iter){
     cat(paste0("\n[UNIFAC] Convergence not reached. Increase max.iter.\n"))
   }
+  
   E0=(data.mat-Reduce("+", estim))
-  G0=sigma.mat.batch*Reduce("+",estim[foo[1:length(index.set.source), length(index.set.batch)]])
-  I0=sigma.mat.batch*Reduce("+", estim[1:length(index.set.source),-length(index.set.batch)])
-  E=E0*sig*sigma.features
-  G=sigma.features*G0
-  I=sigma.features*I0
+  G0=Reduce("+",estim[foo[1, length(index.set.batch)]])
+  I0=Reduce("+", estim[1,-length(index.set.batch)])
+  
+  e=as.matrix(data.mat2-sigma.mat.batch*(G0+I0))
+  s2=numeric(n.batches)
+  for (b in 1:n.batches){
+    s2[b]=var(as.numeric(e[,batches==b]))
+  }
+
+  # s2=unique(as.numeric(sigma.mat.batch))^2
+  sb=sqrt(sum(nvec*s2)/sum(nvec))
+  
+  # sig=sd(data.mat2-sigma.mat.batch*(G0+I0))
+  # E=sb*sigma.features*E0
+  # G=sb*sigma.features*G0
+  # I=sb*sigma.features*I0
+
+  E=sb*E0
+  G=sigma.mat.batch*G0
+  I=sb*I0
+  
   harmonized=Xbeta+G+E
 
-  return(list(dat.unifac=harmonized,Xbeta=Xbeta,
-              G=G,I=I,E=E,G0=G0, I0=I0,E0=E0,batches=batches.f,
-              sig=sig,sigma.batch=unique(as.matrix(sigma.mat.batch)),sigma.features=sigma.features))
+  return(list(dat.unifac=harmonized,Xbeta=Xbeta,batches=batches.f,
+              # mn=mn,
+              # sigma.features=sigma.features, sig=sig,
+              sigma.batch=unique(as.numeric(sigma.mat.batch)),
+              G=G, E=E,I=I))
 }

@@ -1,4 +1,4 @@
-rearrange.unifac=function(fit){
+rearrange.unifac=function(fit){ 
   batches=fit$batches
   batches.id=unique(batches)
   n.batches=length(batches.id)

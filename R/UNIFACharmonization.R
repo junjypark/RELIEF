@@ -1,6 +1,6 @@
 UNIFACharmonize=function(data.mat, batches=NULL, sources=NULL, covariates=NULL,
                           scale.features=T, eps=1e-3, max.iter=1000, verbose=T){
-  if (verbose) {
+  if (verbose) { 
     if (!is.null(covariates)){ cat(paste0("[UNIFAC] Performing UNIFAC harmonization with ", ncol(covariates), " covariates\n")) }
     else{ cat(paste0("[UNIFAC] Performing UNIFAC harmonization without covariates\n")) }
   }

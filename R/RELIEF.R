@@ -12,11 +12,17 @@ softSVD=function(X, lambda){
 relief=function(dat, batch=NULL, mod=NULL,
                 scale.features=T, eps=1e-3, max.iter=1000, verbose=T){
   if (verbose) {
-    if (!is.null(mod)){ cat(paste0("[RELIEF] Performing RELIEF harmonization with ", ncol(mod), " covariates\n")) } 
-    else{ cat(paste0("[RELIEF] Performing RELIEF harmonization without covariates\n")) }
+    if (!is.null(mod)){ 
+      q=ncol(mod)
+      cat(paste0("[RELIEF] Performing RELIEF harmonization with ", ncol(mod), " covariates\n")) 
+    } 
+    else{ 
+      q=0
+      cat(paste0("[RELIEF] Performing RELIEF harmonization without covariates\n")) 
+    }
   }
   if (is.null(batch)){ stop("batch information must be provided\n") }
-  p=nrow(dat); n=ncol(dat);q=ncol(mod)
+  p=nrow(dat); n=ncol(dat);
   dat.original=dat
   batch.f=as.factor(batch); batch = as.numeric(batch.f)
   batch.id=unique(batch); n.batch=length(batch.id);batch.f.id=unique(batch.f);
@@ -36,9 +42,9 @@ relief=function(dat, batch=NULL, mod=NULL,
   gamma = residual1%*%Pb
   residual2 = residual1-gamma
   
-  if(scale.features){
-    sigma.mat=sqrt(rowSums(residual2^2)/(n-n.batch))%*%t(rep(1,n))
-  }else{ 
+  if (scale.features){
+    sigma.mat=sqrt(rowSums(residual2^2)/(n-n.batch-q))%*%t(rep(1,n))
+  } else { 
     sigma.mat=1 
   }
   
@@ -108,6 +114,7 @@ relief=function(dat, batch=NULL, mod=NULL,
   I=sigma.mat*sigma.mat.batch*Reduce("+", estim[-length(index.set.batch)])
   harmonized=Xbeta+R+sigma.harnomized*E.scaled
   estimates=list(Xbeta=Xbeta,gamma=gamma,sigma.mat=sigma.mat, sigma.mat.batch=as.matrix(sigma.mat.batch),sigma.harnomized=sigma.harnomized, R=as.matrix(R),I=as.matrix(I),E.scaled=as.matrix(E.scaled), E.original=as.matrix(E.original))
+  
   return(list(dat.relief=as.matrix(harmonized),
               estimates=estimates,dat.original=dat.original,
               batch=batch.f))

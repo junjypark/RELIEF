@@ -1,12 +1,12 @@
-Package: UNIFACharmonization
+Package: RELIEF
 Type: Package
-Title: UNIFAC harmonization for removing latent patch effects
+Title: RELIEF harmonization for removing latent patch effects
 Version: 0.1.0
 Author: Jun Young Park, Rongqian Zhang
 Maintainer: Jun Young Park <junjy.park@utronto.ca>
 Description: TBD
 License: GPL-3
 Encoding: UTF-8
-LinkingTo: Matrix, foreach, denoiseR
-Depends: Matrix, foreach, denoiseR
+LinkingTo: Matrix, MASS, denoiseR
+Depends: Matrix, MASS, denoiseR
  

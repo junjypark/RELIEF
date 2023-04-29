@@ -7,6 +7,5 @@ Maintainer: Jun Young Park <junjy.park@utronto.ca>
 Description: TBD
 License: GPL-3
 Encoding: UTF-8
-LinkingTo: Matrix, MASS, denoiseR
 Depends: Matrix, MASS, denoiseR
  

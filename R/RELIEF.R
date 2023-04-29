@@ -1,7 +1,3 @@
-library(denoiseR)
-library(Matrix)
-library(MASS)
-
 frob=function(X){ sum(X^2,na.rm=T) }
 
 sigma.rmt=function(X){ estim_sigma(X,method="MAD") }

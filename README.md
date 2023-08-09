@@ -6,7 +6,7 @@ R package to apply **RELIEF harmonization** to multi-site or multi-scanner neuro
 
 ### References
 
-> Zhang, R., Oliver, L. D., Voineskos, A. N., Park, J. Y. (2023+). RELIEF: a structured multivariate approach for removal of latent inter-scanner effects. bioRxiv, 2022-08. [article link](https://doi.org/10.1101/2022.08.01.502396)
+> Zhang, R., Oliver, L. D., Voineskos, A. N., Park, J. Y. (2023). RELIEF: a structured multivariate approach for removal of latent inter-scanner effects. Imaging Neuroscience (in press). [BioRxiv link](https://doi.org/10.1101/2022.08.01.502396)
 
 ### Update logs
 

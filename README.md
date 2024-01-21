@@ -1,12 +1,12 @@
 # RELIEF
 
-**REmoval of Latent Inter-scanner effects through Factorization**
+**REmoval of Latent Inter-scanner Effects through Factorization**
 
 R package to apply **RELIEF harmonization** to multi-site or multi-scanner neuroimaging studies. This method has been previously called **UNIFAC harmonization**.
 
 ### References
 
-> Zhang, R., Oliver, L. D., Voineskos, A. N., Park, J. Y. (2023). RELIEF: a structured multivariate approach for removal of latent inter-scanner effects. Imaging Neuroscience (in press). [link](https://doi.org/10.1162/imag_a_00011)
+> Zhang, R., Oliver, L. D., Voineskos, A. N., Park, J. Y. (2023). RELIEF: a structured multivariate approach for removal of latent inter-scanner effects. Imaging Neuroscience. [link](https://doi.org/10.1162/imag_a_00011)
 
 ### Update logs
 

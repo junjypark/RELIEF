@@ -39,6 +39,13 @@ if (!require("devtools"))
 devtools::install_github("junjypark/RELIEF")
 ```
 
+Update (September 2025): If the package cannot be installed because the installation of the denoiseR package is not supported with your R version, please install the denoiseR package manually first as follows:
+```R
+if (!require("devtools"))
+  install.packages("devtools")
+devtools::install_github("julierennes/denoiseR")
+```
+
 Note: If you see an error message, please update your `devtools` package first.
 
 ```R

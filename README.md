@@ -10,6 +10,8 @@ R package to apply **RELIEF harmonization** to multi-site or multi-scanner neuro
 
 ### Update logs
 
+> September 18, 2025: Issues regarding installation of the denoiseR package are described below. 
+
 > April 27, 2023: RELIEF method implemented in the package.
 
 ## Contents

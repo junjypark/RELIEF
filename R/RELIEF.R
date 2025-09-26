@@ -2,7 +2,7 @@
 frob=function(X){ sum(X^2,na.rm=T) }
 
 #' @export
-sigma.rmt=function(X){ estim_sigma(X,method="MAD") }
+sigma.rmt=function(X){ estim_sigma(as.data.frame(X),method="MAD") }
 
 #' @export
 softSVD=function(X, lambda){
